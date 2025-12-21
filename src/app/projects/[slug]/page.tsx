@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import GitHubComments from '@/components/GitHubComments'
 import { formatDate } from '@/lib/utils'
-import { ExternalLink, Github, Calendar, Clock } from 'lucide-react'
+import { Github, Calendar, Clock } from 'lucide-react'
 
 interface ProjectParams {
   params: Promise<{
@@ -186,16 +186,6 @@ export default async function Project({ params }: ProjectParams) {
                     <Button asChild variant="default" className="flex items-center gap-2">
                       <a
                         href={frontmatter.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        访问项目
-                      </a>
-                    </Button>
-                    <Button asChild variant="outline" className="flex items-center gap-2">
-                      <a
-                        href="https://github.com/hezhijie0327"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

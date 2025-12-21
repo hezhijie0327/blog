@@ -124,19 +124,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
                               详情
                             </Link>
                           </Button>
-                          {project.link && (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a
-                                href={project.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Github className="w-4 h-4 mr-1" />
-                                源码
-                              </a>
-                            </Button>
-                          )}
-                        </div>
+                          </div>
                       </div>
 
                       {project.date && (
@@ -227,19 +215,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
                               详情
                             </Link>
                           </Button>
-                          {project.link && (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a
-                                href={project.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <Github className="w-4 h-4 mr-1" />
-                                源码
-                              </a>
-                            </Button>
-                          )}
-                        </div>
+                          </div>
                       </div>
                     </CardContent>
                   </Card>

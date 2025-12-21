@@ -117,17 +117,6 @@ export default function GitHubComments({
                 对此项目有疑问或建议？访问 GitHub 仓库参与讨论
               </p>
             </div>
-
-            <a
-              href={`https://github.com/${repo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button>
-                <ExternalLink className="w-4 h-4 mr-2" />
-                访问仓库
-              </Button>
-            </a>
           </div>
         </Card>
       </div>
@@ -365,17 +354,6 @@ export default function GitHubComments({
                 </Button>
               </a>
             )}
-
-            <a
-              href={repoInfo.url}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button variant="outline">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                访问仓库
-              </Button>
-            </a>
           </div>
         </div>
       </Card>
