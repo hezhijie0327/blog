@@ -7,30 +7,31 @@ interface FooterProps {
   className?: string
 }
 
+interface CFInfo {
+  ip: string
+  kex: string
+  http: string
+  tls: string
+  uag: string
+  warp: string
+  colo: string
+  loc: string
+}
+
 export default function Footer({ className = "" }: FooterProps) {
   const currentYear = new Date().getFullYear()
-  const [currentTime, setCurrentTime] = useState<string>('')
-  const [userIP, setUserIP] = useState<string>('获取中...')
-  const [postQuantumSupported, setPostQuantumSupported] = useState<boolean>(false)
+  const [cfInfo, setCfInfo] = useState<CFInfo>({
+    ip: '获取中...',
+    kex: 'unknown',
+    http: 'unknown',
+    tls: 'unknown',
+    uag: 'unknown',
+    warp: 'unknown',
+    colo: 'unknown',
+    loc: 'unknown'
+  })
 
   useEffect(() => {
-    // 更新时间
-    const updateTime = () => {
-      const now = new Date()
-      setCurrentTime(now.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      }))
-    }
-
-    updateTime()
-    const timeInterval = setInterval(updateTime, 1000)
-
     // 获取信息 - 使用 Cloudflare CDN trace
     const fetchInfo = async () => {
       try {
@@ -41,37 +42,72 @@ export default function Footer({ className = "" }: FooterProps) {
           const text = await response.text()
           // 解析 CF trace 输出
           const lines = text.split('\n')
+          const parsedData: Partial<CFInfo> = {}
 
-          // 获取 IP 地址
-          const ipLine = lines.find(line => line.startsWith('ip='))
-          if (ipLine) {
-            const ip = ipLine.split('=')[1]
-            if (ip) {
-              setUserIP(ip)
+          lines.forEach(line => {
+            const [key, value] = line.split('=')
+            if (key && value) {
+              switch (key) {
+                case 'ip':
+                  parsedData.ip = value
+                  break
+                case 'kex':
+                  parsedData.kex = value
+                  break
+                case 'http':
+                  parsedData.http = value
+                  break
+                case 'tls':
+                  parsedData.tls = value
+                  break
+                case 'uag':
+                  parsedData.uag = value.length > 50 ? value.substring(0, 50) + '...' : value
+                  break
+                case 'warp':
+                  parsedData.warp = value
+                  break
+                case 'colo':
+                  parsedData.colo = value
+                  break
+                case 'loc':
+                  parsedData.loc = value
+                  break
+              }
             }
-          }
+          })
 
-          // 检测后量子加密支持
-          const kexLine = lines.find(line => line.startsWith('kex='))
-          if (kexLine) {
-            const kex = kexLine.split('=')[1]
-            if (kex === 'X25519MLKEM768') {
-              setPostQuantumSupported(true)
-            }
-          }
+          setCfInfo(prev => ({ ...prev, ...parsedData }))
         } else {
-          setUserIP('无法获取')
+          setCfInfo(prev => ({ ...prev, ip: '无法获取' }))
         }
       } catch (error) {
         console.error('Failed to fetch info from Cloudflare trace:', error)
-        setUserIP('无法获取')
+        setCfInfo(prev => ({ ...prev, ip: '无法获取' }))
       }
     }
 
     fetchInfo()
-
-    return () => clearInterval(timeInterval)
   }, [])
+
+  const getPostQuantumInfo = () => {
+    if (cfInfo.kex === 'X25519MLKEM768') {
+      return { text: '后量子加密保护', color: 'text-green-500', icon: '🔒' }
+    } else if (cfInfo.kex === 'unknown') {
+      return { text: '检测中...', color: 'text-yellow-500', icon: '⏳' }
+    } else {
+      return { text: '标准加密', color: 'text-orange-500', icon: '🔓' }
+    }
+  }
+
+  const getWarpInfo = () => {
+    if (cfInfo.warp === 'on') {
+      return { text: 'WARP', color: 'text-blue-500' }
+    } else if (cfInfo.warp === 'off') {
+      return { text: '直连', color: 'text-gray-500' }
+    } else {
+      return null
+    }
+  }
 
   return (
     <footer className={cn("bg-background border-t border-border", className)}>
@@ -80,21 +116,34 @@ export default function Footer({ className = "" }: FooterProps) {
           {/* 版权信息 */}
           <span>© {currentYear} Zhijie Online</span>
 
-          {/* 时间和IP信息 */}
-          <div className="flex flex-col items-center space-y-1">
-            <div className="flex items-center space-x-4">
-              <span>🕒 {currentTime}</span>
-              <span>🌐 IP: {userIP}</span>
+          {/* 网络和安全信息 */}
+          <div className="flex flex-col items-center space-y-2">
+            {/* 基础信息 */}
+            <div className="flex items-center space-x-6 text-xs">
+              <span>🌐 {cfInfo.ip}</span>
+              <span>📍 {cfInfo.colo} ({cfInfo.loc})</span>
+              {getWarpInfo() && (
+                <span className={getWarpInfo()?.color}>
+                  🛡️ {getWarpInfo()?.text}
+                </span>
+              )}
             </div>
 
-            {/* 后量子加密支持 */}
-            {postQuantumSupported && (
-              <div className="flex items-center space-x-1 text-xs">
-                <span>🔒</span>
-                <span>后量子加密保护</span>
-                <span className="text-green-500">●</span>
+            {/* 加密信息 */}
+            <div className="flex items-center space-x-4 text-xs">
+              <div className="flex items-center space-x-1">
+                <span>{getPostQuantumInfo().icon}</span>
+                <span className={getPostQuantumInfo().color}>{getPostQuantumInfo().text}</span>
               </div>
-            )}
+              <span>🔐 {cfInfo.tls}</span>
+              <span>🚀 {cfInfo.http}</span>
+            </div>
+
+            {/* 浏览器信息 */}
+            <div className="flex items-center space-x-2 text-xs text-foreground/50">
+              <span>🌍</span>
+              <span>{cfInfo.uag}</span>
+            </div>
           </div>
         </div>
       </div>
