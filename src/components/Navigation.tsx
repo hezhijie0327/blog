@@ -46,7 +46,7 @@ export default function Navigation() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = pathname === item.href && item.href !== '/'
               return (
                 <Link
                   key={item.name}
@@ -113,7 +113,7 @@ export default function Navigation() {
             >
               <div className="flex flex-col space-y-2">
                 {navigation.map((item) => {
-                  const isActive = pathname === item.href
+                  const isActive = pathname === item.href && item.href !== '/'
                   return (
                     <Link
                       key={item.name}
