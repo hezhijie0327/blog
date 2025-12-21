@@ -23,6 +23,29 @@ export interface GitHubDiscussion {
   }
 }
 
+export interface GitHubIssue {
+  id: string
+  title: string
+  body: string
+  url: string
+  number: number
+  state: 'open' | 'closed'
+  author: {
+    login: string
+    avatarUrl: string
+    url: string
+  }
+  createdAt: string
+  updatedAt: string
+  comments: {
+    totalCount: number
+  }
+  labels: {
+    name: string
+    color: string
+  }[]
+}
+
 export interface GitHubRepoInfo {
   name: string
   fullName: string
@@ -203,6 +226,78 @@ export async function hasDiscussionsEnabled(repo: string): Promise<boolean> {
   } catch (error) {
     console.error(`Error checking Discussions for ${repo}:`, error)
     return false
+  }
+}
+
+// 获取仓库的 Issues
+export async function getGitHubIssues(
+  repo: string,
+  limit: number = 10,
+  state: 'open' | 'closed' | 'all' = 'open'
+): Promise<GitHubIssue[]> {
+  const cacheKey = `issues-${repo}-${limit}-${state}`
+  const cached = cache.get(cacheKey)
+
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      'Accept': 'application/vnd.github.v3+json',
+    }
+
+    // 如果提供了 GitHub token，添加到请求头中
+    if (process.env.GITHUB_TOKEN) {
+      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
+    }
+
+    const response = await fetch(
+      `https://api.github.com/repos/${repo}/issues?per_page=${limit}&sort=created&direction=desc&state=${state}`,
+      {
+        headers,
+        next: { revalidate: CACHE_DURATION / 1000 }
+      }
+    )
+
+    if (!response.ok) {
+      console.error(`GitHub Issues API error for ${repo}:`, response.status, response.statusText)
+      return []
+    }
+
+    const data = await response.json()
+
+    // 过滤掉 pull requests，因为 GitHub API 会将 PR 也作为 Issues 返回
+    const issues: GitHubIssue[] = data
+      .filter((item: any) => !item.pull_request)
+      .map((item: any) => ({
+        id: item.id.toString(),
+        title: item.title,
+        body: item.body || '',
+        url: item.html_url,
+        number: item.number,
+        state: item.state,
+        author: {
+          login: item.user.login,
+          avatarUrl: item.user.avatar_url,
+          url: item.user.html_url
+        },
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+        comments: {
+          totalCount: item.comments || 0
+        },
+        labels: item.labels.map((label: any) => ({
+          name: label.name,
+          color: label.color
+        }))
+      }))
+
+    cache.set(cacheKey, { data: issues, timestamp: Date.now() })
+    return issues
+  } catch (error) {
+    console.error(`Error fetching GitHub Issues for ${repo}:`, error)
+    return []
   }
 }
 
