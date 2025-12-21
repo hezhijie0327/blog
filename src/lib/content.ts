@@ -21,6 +21,7 @@ export interface ProjectItem extends ContentItem {
   type: 'personal' | 'starred'
   link?: string
   image?: string
+  githubRepo?: string // 解析出的 GitHub 仓库，格式: "owner/repo"
 }
 
 export interface BlogItem extends ContentItem {
@@ -149,13 +150,31 @@ export function getAllContent(type: string, limit?: number): ContentItem[] {
   return posts
 }
 
+// 解析 GitHub 仓库链接
+function parseGitHubRepo(link?: string): string | undefined {
+  if (!link) return undefined
+
+  const githubUrlRegex = /github\.com\/([^\/]+)\/([^\/\?#]+)/i
+  const match = link.match(githubUrlRegex)
+
+  if (match) {
+    const [, owner, repo] = match
+    // 移除 .git 后缀
+    const cleanRepo = repo.replace(/\.git$/, '')
+    return `${owner}/${cleanRepo}`
+  }
+
+  return undefined
+}
+
 // 获取项目列表
 export function getAllProjects(): ProjectItem[] {
   const projects = getAllContent('projects').map(project => ({
     ...project,
     type: project.frontmatter.type || 'personal' as const,
     link: project.frontmatter.link,
-    image: project.frontmatter.image
+    image: project.frontmatter.image,
+    githubRepo: parseGitHubRepo(project.frontmatter.link)
   }))
 
   return projects

@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { getAllContent, getAllContentSlugs } from '@/lib/content'
+import { getAllContent, getAllContentSlugs, getAllProjects, type ProjectItem } from '@/lib/content'
 import { getContentBySlug } from '@/lib/content'
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
@@ -56,6 +56,11 @@ export default async function Project({ params }: ProjectParams) {
   if (!project) {
     notFound()
   }
+
+  // 获取包含 githubRepo 信息的完整项目数据
+  const projects = getAllProjects()
+  const projectData = projects.find(p => p.slug === slug)
+  const githubRepo = projectData?.githubRepo
 
   const markdownContent = project.content
   const frontmatter = project.frontmatter
@@ -206,8 +211,8 @@ export default async function Project({ params }: ProjectParams) {
 
           {/* GitHub Comments */}
           <GitHubComments
-            repo="hezhijie0327/blog"
-            issueNumber={parseInt(slug.replace(/\D/g, '')) || 1}
+            repo={githubRepo}
+            title={`关于项目 "${project.title}" 的讨论`}
           />
         </div>
       </div>

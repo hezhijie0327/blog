@@ -165,7 +165,7 @@ export default async function BlogPost({ params }: BlogPostParams) {
           {/* GitHub Comments */}
           <GitHubComments
             repo="hezhijie0327/blog"
-            issueNumber={parseInt(slug.replace(/\D/g, '')) || 1}
+            title={`关于文章 "${post.title}" 的讨论`}
           />
         </div>
       </div>
