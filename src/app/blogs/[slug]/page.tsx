@@ -164,7 +164,7 @@ export default async function BlogPost({ params }: BlogPostParams) {
 
           {/* GitHub Comments */}
           <GitHubComments
-            repo="hezhijie0327/hezhijie0327.github.io"
+            repo="hezhijie0327/blog"
             issueNumber={parseInt(slug.replace(/\D/g, '')) || 1}
           />
         </div>

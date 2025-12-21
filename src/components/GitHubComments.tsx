@@ -21,13 +21,13 @@ export default function GitHubComments({
       </div>
       <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center">
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          评论功能暂时不可用
+          欢迎在 GitHub 上参与讨论
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500">
-          如有问题或建议，请通过 GitHub 联系我
+        <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+          对文章内容有疑问或建议？欢迎提交 Issue 或 Pull Request
         </p>
         <a
-          href={`https://github.com/${repo}`}
+          href={`https://github.com/${repo}/issues/new?title=评论：${encodeURIComponent(`关于 ${issueNumber} 的讨论`)}`}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
