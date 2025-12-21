@@ -38,6 +38,25 @@ export interface GitHubRepoInfo {
 const CACHE_DURATION = 5 * 60 * 1000 // 5分钟缓存
 const cache = new Map<string, { data: any; timestamp: number }>()
 
+// GitHub Discussions 默认分类的 emoji 映射
+const emojiMap: Record<string, string> = {
+  // GitHub 默认 Discussions 分类
+  'announcements': '📣',        // 📣 Announcements
+  'general': '💬',               // 💬 General
+  'ideas': '💡',                 // 💡 Ideas
+  'q&a': '🙏',                   // 🙏 Q&A
+  'show and tell': '🙌',         // 🙌 Show and tell
+
+  // 兼容其他可能的格式
+  'announcement': '📣',
+  'speech_balloon': '💬',
+  'question': '🙏',
+  'idea': '💡',
+  'show_and_tell': '🙌',
+  'poll': '📊',
+  'help_wanted': '🤝'
+}
+
 // 获取仓库信息
 export async function getGitHubRepoInfo(repo: string): Promise<GitHubRepoInfo | null> {
   const cacheKey = `repo-${repo}`
@@ -113,10 +132,9 @@ export async function getGitHubDiscussions(
       headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
     }
 
-    // GitHub GraphQL API 是获取 Discussions 的唯一方式
-    // 这里使用 REST API 的搜索功能作为备选方案
+    // 使用直接 Discussions API 端点
     const response = await fetch(
-      `https://api.github.com/search/issues?q=repo:${repo}+type:disc&sort=created&order=desc&per_page=${limit}`,
+      `https://api.github.com/repos/${repo}/discussions?per_page=${limit}&sort=created&direction=desc`,
       {
         headers,
         next: { revalidate: CACHE_DURATION / 1000 }
@@ -130,27 +148,36 @@ export async function getGitHubDiscussions(
 
     const data = await response.json()
 
-    const discussions: GitHubDiscussion[] = data.items.map((item: any) => ({
-      id: item.id.toString(),
-      title: item.title,
-      body: item.body || '',
-      url: item.html_url,
-      author: {
-        login: item.user.login,
-        avatarUrl: item.user.avatar_url,
-        url: item.user.html_url
-      },
-      createdAt: item.created_at,
-      updatedAt: item.updated_at,
-      upvoteCount: item.reactions?.['+1'] || 0,
-      comments: {
-        totalCount: item.comments || 0
-      },
-      category: {
-        name: 'General',
-        emoji: '💬'
+    const discussions: GitHubDiscussion[] = data.map((item: any) => {
+      // 处理 emoji
+      const rawEmoji = item.category?.emoji?.replace(/:/g, '')?.toLowerCase() || 'general'
+      const categoryName = item.category?.name?.toLowerCase() || 'general'
+
+      // 尝试从 emoji 映射或分类名获取对应的 emoji
+      const emoji = emojiMap[rawEmoji] || emojiMap[categoryName] || '💬'
+
+      return {
+        id: item.id.toString(),
+        title: item.title,
+        body: item.body || '',
+        url: item.html_url,
+        author: {
+          login: item.user.login,
+          avatarUrl: item.user.avatar_url,
+          url: item.user.html_url
+        },
+        createdAt: item.created_at,
+        updatedAt: item.updated_at,
+        upvoteCount: item.reactions?.total_count || 0,
+        comments: {
+          totalCount: item.comments || 0
+        },
+        category: {
+          name: item.category?.name || 'General',
+          emoji: emoji
+        }
       }
-    }))
+    })
 
     cache.set(cacheKey, { data: discussions, timestamp: Date.now() })
     return discussions
