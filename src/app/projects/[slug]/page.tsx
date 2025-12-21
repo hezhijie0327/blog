@@ -30,12 +30,12 @@ export async function generateMetadata({ params }: ProjectParams): Promise<Metad
 
   if (!project) {
     return {
-      title: '项目未找到 - 治杰 Online',
+      title: '项目未找到',
     }
   }
 
   return {
-    title: `${project.title} - 治杰 Online`,
+    title: project.title,
     description: project.description || '个人项目展示',
     keywords: project.tags,
     openGraph: {

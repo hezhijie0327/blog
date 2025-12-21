@@ -29,12 +29,12 @@ export async function generateMetadata({ params }: BlogPostParams): Promise<Meta
 
   if (!post) {
     return {
-      title: '文章未找到 - 治杰 Online',
+      title: '文章未找到',
     }
   }
 
   return {
-    title: `${post.title} - 治杰 Online`,
+    title: post.title,
     description: post.description || '个人技术博客',
     keywords: post.tags,
     openGraph: {
