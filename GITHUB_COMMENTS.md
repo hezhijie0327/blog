@@ -20,7 +20,6 @@
 ### 🔄 缓存优化
 - 5分钟内存缓存，减少 API 请求
 - Next.js Data Cache 支持持久化缓存
-- 支持环境变量配置 GitHub Token
 
 ## 使用方式
 
@@ -33,28 +32,12 @@
 - 固定使用 `hezhijie0327/blog` 仓库
 - 评论标题格式：`关于文章 "${文章名}" 的讨论`
 
-## 配置说明
-
-### 环境变量（可选）
-```bash
-# .env.local
-GITHUB_TOKEN=your_github_token_here
-```
-
-### GitHub Token 权限
-- `public_repo` - 访问公开仓库
-- `repo:status` - 读取仓库状态
-- `read:discussion` - 读取 Discussions（需要）
-
 ## API 限制
 
-### 无 Token
-- 60 请求/小时
-- 无法访问私有仓库的 Discussions
-
-### 有 Token
-- 5,000 请求/小时
-- 可访问有权限的仓库的 Discussions
+### 当前限制
+- 60 请求/小时（IP 级别限制）
+- 仅能访问公开仓库的信息
+- 建议：频繁使用时注意缓存和请求频率
 
 ## 组件接口
 
@@ -88,8 +71,8 @@ interface GitHubCommentsProps {
 
 1. **Discussions 无法显示**
    - 确保仓库已启用 Discussions 功能
-   - 检查 GitHub Token 权限
    - 验证仓库是否为公开仓库
+   - 检查是否超过 API 请求限制（60次/小时）
 
 2. **API 请求失败**
    - 检查网络连接
@@ -107,6 +90,5 @@ interface GitHubCommentsProps {
 curl https://api.github.com/repos/owner/repo
 
 # 检查 Discussions 是否启用
-curl -H "Authorization: token YOUR_TOKEN" \
-     https://api.github.com/repos/owner/repo
+curl https://api.github.com/repos/owner/repo
 ```

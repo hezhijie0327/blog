@@ -90,17 +90,10 @@ export async function getGitHubRepoInfo(repo: string): Promise<GitHubRepoInfo | 
   }
 
   try {
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github.v3+json',
-    }
-
-    // 如果提供了 GitHub token，添加到请求头中
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
-    }
-
     const response = await fetch(`https://api.github.com/repos/${repo}`, {
-      headers,
+      headers: {
+        'Accept': 'application/vnd.github.v3+json',
+      },
       next: { revalidate: CACHE_DURATION / 1000 } // 缓存时间（秒）
     })
 
@@ -146,20 +139,13 @@ export async function getGitHubDiscussions(
   }
 
   try {
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github.v3+json',
-    }
-
-    // Discussions API 需要 GitHub token
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
-    }
-
     // 使用直接 Discussions API 端点
     const response = await fetch(
       `https://api.github.com/repos/${repo}/discussions?per_page=${limit}&sort=created&direction=desc`,
       {
-        headers,
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
         next: { revalidate: CACHE_DURATION / 1000 }
       }
     )
@@ -243,19 +229,12 @@ export async function getGitHubIssues(
   }
 
   try {
-    const headers: Record<string, string> = {
-      'Accept': 'application/vnd.github.v3+json',
-    }
-
-    // 如果提供了 GitHub token，添加到请求头中
-    if (process.env.GITHUB_TOKEN) {
-      headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`
-    }
-
     const response = await fetch(
       `https://api.github.com/repos/${repo}/issues?per_page=${limit}&sort=created&direction=desc&state=${state}`,
       {
-        headers,
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
         next: { revalidate: CACHE_DURATION / 1000 }
       }
     )
