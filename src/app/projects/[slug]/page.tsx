@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import GitHubComments from "@/components/GitHubComments";
+import MermaidRenderer from "@/components/MermaidRenderer";
 import { formatDate } from "@/lib/utils";
 import { GitBranch, Calendar, Clock } from "lucide-react";
 
@@ -192,11 +193,27 @@ export default async function Project({ params }: ProjectParams) {
                           {children}
                         </code>
                       ),
-                      pre: ({ children, ...props }) => (
-                        <div className="bg-gray-900 dark:bg-gray-800 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
-                          <pre {...props}>{children}</pre>
-                        </div>
-                      ),
+                      pre: ({ children, ...props }) => {
+                        const codeChild = Array.isArray(children)
+                          ? children[0]
+                          : children;
+                        const className = codeChild?.props?.className || "";
+                        const isMermaidBlock =
+                          className.includes("language-mermaid");
+                        const chartText = String(
+                          codeChild?.props?.children || "",
+                        ).trim();
+
+                        if (isMermaidBlock && chartText) {
+                          return <MermaidRenderer chart={chartText} />;
+                        }
+
+                        return (
+                          <div className="bg-gray-900 dark:bg-gray-800 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
+                            <pre {...props}>{children}</pre>
+                          </div>
+                        );
+                      },
                       blockquote: ({ children, ...props }) => (
                         <blockquote
                           className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 dark:bg-blue-900/20 italic text-slate-700 dark:text-foreground/80"

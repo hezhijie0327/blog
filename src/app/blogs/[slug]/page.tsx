@@ -1,61 +1,64 @@
-import { Metadata } from 'next'
-import { getAllContent, getAllContentSlugs, BlogItem } from '@/lib/content'
-import { getContentBySlug } from '@/lib/content'
-import { notFound } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
+import { Metadata } from "next";
+import { getAllContent, getAllContentSlugs, BlogItem } from "@/lib/content";
+import { getContentBySlug } from "@/lib/content";
+import { notFound } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 // Import MDX components type for better typing
-import { Card, CardContent, CardHeader } from '@/components/ui/Card'
-import { Badge } from '@/components/ui/Badge'
-import GitHubComments from '@/components/GitHubComments'
-import { formatDate } from '@/lib/utils'
+import { Card, CardContent, CardHeader } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import GitHubComments from "@/components/GitHubComments";
+import MermaidRenderer from "@/components/MermaidRenderer";
+import { formatDate } from "@/lib/utils";
 
 interface BlogPostParams {
   params: Promise<{
-    slug: string
-  }>
+    slug: string;
+  }>;
 }
 
 export async function generateStaticParams() {
-  const slugs = getAllContentSlugs('blogs')
+  const slugs = getAllContentSlugs("blogs");
   return slugs.map((slug) => ({
     slug,
-  }))
+  }));
 }
 
-export async function generateMetadata({ params }: BlogPostParams): Promise<Metadata> {
-  const { slug } = await params
-  const post = await getContentBySlug(slug, 'blogs')
+export async function generateMetadata({
+  params,
+}: BlogPostParams): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getContentBySlug(slug, "blogs");
 
   if (!post) {
     return {
-      title: '文章未找到',
-    }
+      title: "文章未找到",
+    };
   }
 
   return {
     title: post.title,
-    description: post.description || '个人技术博客',
+    description: post.description || "个人技术博客",
     keywords: post.tags,
     openGraph: {
       title: post.title,
       description: post.description,
-      type: 'article',
+      type: "article",
       publishedTime: post.date,
       tags: post.tags,
     },
-  }
+  };
 }
 
 export default async function BlogPost({ params }: BlogPostParams) {
-  const { slug } = await params
-  const post = await getContentBySlug(slug, 'blogs') as BlogItem
+  const { slug } = await params;
+  const post = (await getContentBySlug(slug, "blogs")) as BlogItem;
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  const markdownContent = post.content
+  const markdownContent = post.content;
 
   return (
     <div className="h-full bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-900 dark:to-slate-800 overflow-y-auto">
@@ -68,8 +71,8 @@ export default async function BlogPost({ params }: BlogPostParams) {
                   {post.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                  <time dateTime={post.date || ''} className="font-medium">
-                    {post.date ? formatDate(post.date) : '未知日期'}
+                  <time dateTime={post.date || ""} className="font-medium">
+                    {post.date ? formatDate(post.date) : "未知日期"}
                   </time>
                   <span>•</span>
                   <span className="font-medium">{post.readingTime}</span>
@@ -99,32 +102,50 @@ export default async function BlogPost({ params }: BlogPostParams) {
                     <ReactMarkdown
                       components={{
                         h1: ({ children, ...props }) => (
-                          <h1 className="text-3xl font-bold mb-4 text-gray-900 dark:text-white" {...props}>
+                          <h1
+                            className="text-3xl font-bold mb-4 text-gray-900 dark:text-white"
+                            {...props}
+                          >
                             {children}
                           </h1>
                         ),
                         h2: ({ children, ...props }) => (
-                          <h2 className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 mt-6" {...props}>
+                          <h2
+                            className="text-2xl font-semibold mb-3 text-gray-800 dark:text-gray-200 mt-6"
+                            {...props}
+                          >
                             {children}
                           </h2>
                         ),
                         h3: ({ children, ...props }) => (
-                          <h3 className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300 mt-4" {...props}>
+                          <h3
+                            className="text-xl font-semibold mb-2 text-gray-700 dark:text-gray-300 mt-4"
+                            {...props}
+                          >
                             {children}
                           </h3>
                         ),
                         p: ({ children, ...props }) => (
-                          <p className="mb-4 text-slate-700 dark:text-foreground/80 leading-relaxed" {...props}>
+                          <p
+                            className="mb-4 text-slate-700 dark:text-foreground/80 leading-relaxed"
+                            {...props}
+                          >
                             {children}
                           </p>
                         ),
                         ul: ({ children, ...props }) => (
-                          <ul className="list-disc pl-6 mb-4 text-slate-700 dark:text-foreground/80" {...props}>
+                          <ul
+                            className="list-disc pl-6 mb-4 text-slate-700 dark:text-foreground/80"
+                            {...props}
+                          >
                             {children}
                           </ul>
                         ),
                         ol: ({ children, ...props }) => (
-                          <ol className="list-decimal pl-6 mb-4 text-slate-700 dark:text-foreground/80" {...props}>
+                          <ol
+                            className="list-decimal pl-6 mb-4 text-slate-700 dark:text-foreground/80"
+                            {...props}
+                          >
                             {children}
                           </ol>
                         ),
@@ -134,17 +155,39 @@ export default async function BlogPost({ params }: BlogPostParams) {
                           </li>
                         ),
                         code: ({ children, ...props }) => (
-                          <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm font-mono" {...props}>
+                          <code
+                            className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm font-mono"
+                            {...props}
+                          >
                             {children}
                           </code>
                         ),
-                        pre: ({ children, ...props }) => (
-                          <div className="bg-gray-900 dark:bg-gray-800 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
-                            <pre {...props}>{children}</pre>
-                          </div>
-                        ),
+                        pre: ({ children, ...props }) => {
+                          const codeChild = Array.isArray(children)
+                            ? children[0]
+                            : children;
+                          const className = codeChild?.props?.className || "";
+                          const isMermaidBlock =
+                            className.includes("language-mermaid");
+                          const chartText = String(
+                            codeChild?.props?.children || "",
+                          ).trim();
+
+                          if (isMermaidBlock && chartText) {
+                            return <MermaidRenderer chart={chartText} />;
+                          }
+
+                          return (
+                            <div className="bg-gray-900 dark:bg-gray-800 text-gray-100 p-4 rounded-lg mb-4 overflow-x-auto">
+                              <pre {...props}>{children}</pre>
+                            </div>
+                          );
+                        },
                         blockquote: ({ children, ...props }) => (
-                          <blockquote className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 dark:bg-blue-900/20 italic text-slate-700 dark:text-foreground/80" {...props}>
+                          <blockquote
+                            className="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 dark:bg-blue-900/20 italic text-slate-700 dark:text-foreground/80"
+                            {...props}
+                          >
                             {children}
                           </blockquote>
                         ),
@@ -170,5 +213,5 @@ export default async function BlogPost({ params }: BlogPostParams) {
         </div>
       </div>
     </div>
-  )
+  );
 }
