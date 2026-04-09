@@ -158,6 +158,12 @@ body::before {
   color: hsl(var(--foreground));
 }
 
+pre::selection,
+pre *::selection {
+  background: rgba(59, 130, 246, 0.45);
+  color: #f8fafc;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
