@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import type { ReactNode } from "react";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "治杰 Online",
-    template: "%s | 治杰 Online"
+    template: "%s | 治杰 Online",
   },
   description: "个人技术博客和项目展示网站",
   keywords: ["技术博客", "开源项目", "前端开发", "后端开发", "个人作品"],
@@ -49,39 +50,15 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <html lang="zh" suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                function getThemePreference() {
-                  if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-                    return localStorage.getItem('theme');
-                  }
-                  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                }
-
-                const theme = getThemePreference();
-                document.documentElement.classList.toggle('dark', theme === 'dark');
-                if (typeof localStorage !== 'undefined') {
-                  localStorage.setItem('theme', theme);
-                }
-              })();
-            `,
-          }}
-        />
-      </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen bg-background text-foreground flex flex-col overflow-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background text-foreground antialiased flex flex-col`}
       >
         <Navigation />
-        <main className="flex-1 pt-16 pb-1 overflow-hidden">
-          {children}
-        </main>
+        <main className="flex-1 pt-16 pb-6">{children}</main>
         <Footer className="flex-shrink-0" />
       </body>
     </html>
